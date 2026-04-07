@@ -299,12 +299,23 @@ std::string CppGenerator::GenerateSingleFunction(const FunctionWrapper& Func, co
 
 	FunctionInfo FuncInfo = GenerateFunctionInfo(Func);
 
+	// Compute RVA for Unreal (non-predefined) functions
+	std::string RVAComment;
+	if (!Func.IsPredefined())
+	{
+		const void* const ExecFuncPtr = Func.GetUnrealFunction().GetExecFunction();
+		if (ExecFuncPtr)
+			RVAComment = std::format(" (RVA: 0x{:0{}X})", Platform::GetOffset(ExecFuncPtr), sizeof(void*) * 2);
+	}
+
 	const bool bHasInlineBody = Func.HasInlineBody();
 	const std::string TemplateText = (bHasInlineBody && Func.HasCustomTemplateText() ? (Func.GetPredefFunctionCustomTemplateText() + "\n\t") : "");
 
 	const bool bIsConstFunc = Func.IsConst() && !Func.IsStatic();
 
 	// Function declaration and inline-body generation
+	if (!Func.IsPredefined())
+		InHeaderFunctionText += std::format("\t// {}{}\n", Func.GetUnrealFunction().GetFullName(), RVAComment);
 	InHeaderFunctionText += std::format("\t{}{}{}{}{}{}", TemplateText, (Func.IsStatic() ? "static " : ""), FuncInfo.RetType, (FuncInfo.RetType.empty() ? "" : " "), FuncInfo.FuncNameWithParams, bIsConstFunc ? " const" : "");
 	InHeaderFunctionText += (bHasInlineBody ? ("\n\t" + Func.GetPredefFunctionInlineBody()) : ";") + "\n";
 
@@ -424,7 +435,7 @@ std::string CppGenerator::GenerateSingleFunction(const FunctionWrapper& Func, co
 
 	// Function implementation generation
 	std::string FunctionImplementation = std::format(R"(
-// {}
+// {}{}
 // ({})
 {}
 {} {}::{}{}
@@ -438,6 +449,7 @@ std::string CppGenerator::GenerateSingleFunction(const FunctionWrapper& Func, co
 }}
 
 )", UnrealFunc.GetFullName()
+, RVAComment
 , StringifyFunctionFlags(FuncInfo.FuncFlags)
 , bHasParams ? ParamDescriptionCommentString : ""
 , FuncInfo.RetType

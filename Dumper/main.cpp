@@ -38,6 +38,9 @@ DWORD MainThread(HMODULE Module)
 	auto DumpStartTime = std::chrono::high_resolution_clock::now();
 
 	Generator::InitEngineCore();
+
+	std::cerr << std::format("ProcessEvent RVA: 0x{:0{}X}\n\n", static_cast<uintptr_t>(Off::InSDK::ProcessEvent::PEOffset), sizeof(void*) * 2);
+
 	Generator::InitInternal();
 
 	if (Settings::Generator::GameName.empty() && Settings::Generator::GameVersion.empty())
