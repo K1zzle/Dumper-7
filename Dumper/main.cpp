@@ -39,7 +39,7 @@ DWORD MainThread(HMODULE Module)
 
 	Generator::InitEngineCore();
 
-	std::cerr << std::format("ProcessEvent RVA: 0x{:016X}\n\n", static_cast<uintptr_t>(Off::InSDK::ProcessEvent::PEOffset));
+	std::cerr << std::format("ProcessEvent RVA: 0x{:0{}X}\n\n", static_cast<uintptr_t>(Off::InSDK::ProcessEvent::PEOffset), sizeof(void*) * 2);
 
 	Generator::InitInternal();
 

@@ -305,7 +305,7 @@ std::string CppGenerator::GenerateSingleFunction(const FunctionWrapper& Func, co
 	{
 		const void* const ExecFuncPtr = Func.GetUnrealFunction().GetExecFunction();
 		if (ExecFuncPtr)
-			RVAComment = std::format(" (RVA: 0x{:016X})", Platform::GetOffset(ExecFuncPtr));
+			RVAComment = std::format(" (RVA: 0x{:0{}X})", Platform::GetOffset(ExecFuncPtr), sizeof(void*) * 2);
 	}
 
 	const bool bHasInlineBody = Func.HasInlineBody();
